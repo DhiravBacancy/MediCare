@@ -55,16 +55,17 @@ namespace MediCare.Configurations
                 .WithOne(a => a.Patient) // An appointment is associated with one patient
                 .HasForeignKey(a => a.PatientId)
                 .OnDelete(DeleteBehavior.Cascade);
+       
 
-            builder.HasMany(p => p.Billings) // A patient can have many billings
-                .WithOne(b => b.Patient) // A billing is for one patient
-                .HasForeignKey(b => b.PatientId)
-                .OnDelete(DeleteBehavior.Cascade);
+            //builder.HasMany(p => p.Billings) // A patient can have many billings
+            //    .WithOne(b => b.Patient) // A billing is for one patient
+            //    .HasForeignKey(b => b.PatientId)
+            //    .OnDelete(DeleteBehavior.Cascade);
 
-            builder.HasMany(p => p.PatientNotes) // A patient can have many patient notes
-                .WithOne(pn => pn.Patient) // Each note is linked to one patient
-                .HasForeignKey(pn => pn.PatientId) // Foreign key to Patient
-                .OnDelete(DeleteBehavior.Cascade);
+            //builder.HasMany(p => p.PatientNotes) // A patient can have many patient notes
+            //    .WithOne(pn => pn.Patient) // Each note is linked to one patient
+            //    .HasForeignKey(pn => pn.PatientId) // Foreign key to Patient
+            //    .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

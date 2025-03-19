@@ -1,6 +1,7 @@
 ﻿using MediCare.Data;
 using MediCare.DTOs;
 using MediCare.Models;
+using MediCare_.DTOs;
 using MediCare_.Services; // Import the generic service
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -9,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace MediCare.Controllers
 {
-    [Authorize(Roles = "Admin")]
+    //[Authorize(Roles = "Admin")]
     [Route("api/[controller]/[action]")]
     public class SpecializationController : ControllerBase
     {
@@ -30,6 +31,8 @@ namespace MediCare.Controllers
             var specialization = new Specialization
             {
                 SpecializationName = model.SpecializationName,
+                CreatedAt = DateTime.UtcNow,
+                CreatedBy = model.CreatedBy ?? "System"
             };
 
             await _specializationService.AddAsync(specialization); // Use the generic AddAsync
@@ -37,26 +40,37 @@ namespace MediCare.Controllers
             return Ok(new { Message = "Specialization created successfully", Specialization = specialization });
         }
 
-        // 🔹 Get All Specializations
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<Specialization>>> GetSpecializations()
+        [HttpPost("filtersearch")]
+        public async Task<IActionResult> SearchUsersByFilters([FromBody] List<Filter> filters)
         {
-            try
-            {
-                var specializations = await _specializationService.GetAllAsync(); // Use the generic GetAllAsync
+            var specializations = await _specializationService.GetByMultipleConditionsAsync(filters);
 
-                if (specializations == null || !specializations.Any())
-                {
-                    return NotFound("No specializations found.");
-                }
-
-                return Ok(specializations);
-            }
-            catch (Exception ex)
+            if (!specializations.Any())
             {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
+                return NotFound(new { Message = "No role found matching the criteria" });
             }
+
+            return Ok(specializations);
         }
+        //[HttpGet]
+        //public async Task<ActionResult<IEnumerable<Specialization>>> GetSpecializations()
+        //{
+        //    try
+        //    {
+        //        var specializations = await _specializationService.GetAllAsync(); // Use the generic GetAllAsync
+
+        //        if (specializations == null || !specializations.Any())
+        //        {
+        //            return NotFound("No specializations found.");
+        //        }
+
+        //        return Ok(specializations);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return StatusCode(500, $"Internal server error: {ex.Message}");
+        //    }
+        //}
 
         // 🔹 Get Specialization by ID
         [HttpGet("{id}")]
@@ -82,7 +96,9 @@ namespace MediCare.Controllers
             if (specialization == null)
                 return NotFound(new { Message = "Specialization not found" });
 
-            specialization.SpecializationName = model.SpecializationName;
+            specialization.SpecializationName = model.SpecializationName ?? specialization.SpecializationName;
+            specialization.UpdatedAt = DateTime.UtcNow;
+            specialization.UpdatedBy = model.UpdatedBy ?? "System";
 
             await _specializationService.UpdateAsync(specialization); // Use the generic UpdateAsync
 

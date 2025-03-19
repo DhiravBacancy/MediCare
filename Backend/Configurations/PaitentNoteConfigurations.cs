@@ -28,10 +28,10 @@ namespace MediCare.Configurations
                 .HasForeignKey<PatientNote>(pn => pn.AppointmentId)
                 .OnDelete(DeleteBehavior.Restrict);  // Or DeleteBehavior.SetNull
 
-            builder.HasOne(pn => pn.Patient)  // One PatientNote belongs to one Patient
-                .WithMany(p => p.PatientNotes)  // One Patient can have many PatientNotes
-                .HasForeignKey(pn => pn.PatientId)
-                .OnDelete(DeleteBehavior.Cascade);  // Cascade delete for Patient
+            //builder.HasOne(pn => pn.Patient)  // One PatientNote belongs to one Patient
+            //    .WithMany(p => p.PatientNotes)  // One Patient can have many PatientNotes
+            //    .HasForeignKey(pn => pn.PatientId)
+            //    .OnDelete(DeleteBehavior.Cascade);  // Cascade delete for Patient
         }
     }
 }

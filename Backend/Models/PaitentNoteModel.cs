@@ -6,8 +6,6 @@ namespace MediCare.Models
     {
         public int PatientNoteId { get; set; }
         public int AppointmentId { get; set; }  // FK to Appointment
-        public int PatientId { get; set; }      // FK to Patient
-
         public string NoteText { get; set; }
 
         // Audit fields
@@ -16,6 +14,5 @@ namespace MediCare.Models
 
         // Navigation properties (marked as virtual)
         public virtual Appointment Appointment { get; set; }
-        public virtual Patient Patient { get; set; }
     }
 }

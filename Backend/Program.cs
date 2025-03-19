@@ -7,12 +7,18 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using MediCare.Repository;
 using MediCare_.Services;
+using QuestPDF;
+using QuestPDF.Infrastructure;
+
+QuestPDF.Settings.License = LicenseType.Community;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddScoped<IAuthService, AuthService>();
 // Register EmailService
 builder.Services.AddSingleton<IEmailService, EmailService>();
+builder.Services.AddScoped<IPdfService, PdfService>();
+
 
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 builder.Services.AddScoped(typeof(IGenericService<>), typeof(GenericService<>));

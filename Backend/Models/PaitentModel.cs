@@ -26,7 +26,7 @@ namespace MediCare.Models
 
         // Navigation properties (marked as virtual)
         public virtual ICollection<Appointment> Appointments { get; set; }
-        public virtual ICollection<Billing> Billings { get; set; }
+        //public virtual ICollection<Billing> Billings { get; set; }
         public virtual ICollection<PatientNote> PatientNotes { get; set; }
     }
 }

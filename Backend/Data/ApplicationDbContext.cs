@@ -23,31 +23,31 @@ namespace MediCare.Data
             base.OnModelCreating(modelBuilder);
 
             // Seed Roles
-            modelBuilder.Entity<Role>().HasData(SeedingData.GetRoles());
+            //modelBuilder.Entity<Role>().HasData(SeedingData.GetRoles());
 
             // Seed Users
-            modelBuilder.Entity<User>().HasData(SeedingData.GetUsers());
+            //modelBuilder.Entity<User>().HasData(SeedingData.GetUsers());
 
             // Seed Specializations
-            modelBuilder.Entity<Specialization>().HasData(SeedingData.GetSpecializations());
+            //modelBuilder.Entity<Specialization>().HasData(SeedingData.GetSpecializations());
 
             // Seed Doctors
-            modelBuilder.Entity<Doctor>().HasData(SeedingData.GetDoctors());
+            //modelBuilder.Entity<Doctor>().HasData(SeedingData.GetDoctors());
 
             // Seed Receptionists
-            modelBuilder.Entity<Receptionist>().HasData(SeedingData.GetReceptionists());
+            //modelBuilder.Entity<Receptionist>().HasData(SeedingData.GetReceptionists());
 
             // Seed Patients
-            modelBuilder.Entity<Patient>().HasData(SeedingData.GetPatients());
+            //modelBuilder.Entity<Patient>().HasData(SeedingData.GetPatients());
 
             // Seed Appointments
-            modelBuilder.Entity<Appointment>().HasData(SeedingData.GetAppointments());
+            //modelBuilder.Entity<Appointment>().HasData(SeedingData.GetAppointments());
 
             // Seed PatientNotes
-            modelBuilder.Entity<PatientNote>().HasData(SeedingData.GetPatientNotes());
+            //modelBuilder.Entity<PatientNote>().HasData(SeedingData.GetPatientNotes());
 
             // Seed Billings
-            modelBuilder.Entity<Billing>().HasData(SeedingData.GetBillings());
+            //modelBuilder.Entity<Billing>().HasData(SeedingData.GetBillings());
         }
 
         public static class SeedingData
@@ -323,7 +323,6 @@ namespace MediCare.Data
                     {
                         PatientNoteId = 1, 
                         AppointmentId = 1, 
-                        PatientId = 1,
                         NoteText = "Patient reported mild chest pain. Recommended ECG.",
                         CreatedBy = "Doctor1", 
                         CreatedAt = new DateTime(2023, 7, 10, 11, 0, 0)
@@ -332,7 +331,6 @@ namespace MediCare.Data
                     {
                         PatientNoteId = 2, 
                         AppointmentId = 2, 
-                        PatientId = 2,
                         NoteText = "Patient has a rash on their arms. Prescribed topical cream.",
                         CreatedBy = "Doctor2", 
                         CreatedAt = new DateTime(2023, 7, 11, 15, 0, 0)

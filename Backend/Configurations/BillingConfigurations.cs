@@ -23,11 +23,10 @@ namespace MediCare.Configurations
                 .HasMaxLength(50);  // Max length for PaymentStatus
 
             // Set up relationships
-
-            builder.HasOne(b => b.Patient)  // One Billing is associated with one Patient
-     .WithMany(p => p.Billings)  // A patient can have many Billings
-     .HasForeignKey(b => b.PatientId)  // Foreign key for Patient
-     .OnDelete(DeleteBehavior.Restrict);  // Prevent deletion of Patient if they are linked to Billing
+     //       builder.HasOne(b => b.Patient)  // One Billing is associated with one Patient
+     //.WithMany(p => p.Billings)  // A patient can have many Billings
+     //.HasForeignKey(b => b.PatientId)  // Foreign key for Patient
+     //.OnDelete(DeleteBehavior.Restrict);  // Prevent deletion of Patient if they are linked to Billing
 
             builder.HasOne(b => b.Appointment)  // One Billing is associated with one Appointment
                 .WithMany(a => a.Billings)  // An appointment can have many Billings

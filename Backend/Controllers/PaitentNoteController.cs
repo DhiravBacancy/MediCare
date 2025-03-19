@@ -1,6 +1,7 @@
 ﻿using MediCare.Data;
 using MediCare.DTOs;
 using MediCare.Models;
+using MediCare_.DTOs;
 using MediCare_.Services; // Import the service namespace
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -14,10 +15,13 @@ namespace MediCare.Controllers
     public class PatientNoteController : ControllerBase
     {
         private readonly IGenericService<PatientNote> _patientNoteService;
+        private readonly IPdfService _pdfService;
 
-        public PatientNoteController(IGenericService<PatientNote> patientNoteService) // Inject the generic service
+
+        public PatientNoteController(IGenericService<PatientNote> patientNoteService, IPdfService pdfService) // Inject the generic service
         {
             _patientNoteService = patientNoteService;
+            _pdfService = pdfService;
         }
 
         // 🔹 Create Patient Note
@@ -32,8 +36,7 @@ namespace MediCare.Controllers
                 NoteText = model.NoteText,
                 CreatedBy = model.CreatedBy ?? "System",
                 CreatedAt = System.DateTime.UtcNow,
-                AppointmentId = model.AppointmentId,
-                PatientId = model.PatientId
+                //AppointmentId = model.AppointmentId,
             };
 
             await _patientNoteService.AddAsync(patientNote); // Use the generic AddAsync
@@ -41,21 +44,22 @@ namespace MediCare.Controllers
             return Ok(new { Message = "PatientNote created successfully", PatientNote = patientNote });
         }
 
-        // 🔹 Get All Patient Notes for a Patient
-        [HttpGet("{patientId}")]
-        public async Task<ActionResult<IEnumerable<PatientNote>>> GetPatientNotes(int patientId)
+        [HttpPost("filtersearch")]
+        public async Task<IActionResult> SearchUsersByFilters([FromBody] List<Filter> filters)
         {
-            // This requires filtering, so we need a specific service
-            // For now, we get all and filter in memory, but this is inefficient.
-            var allNotes = await _patientNoteService.GetAllAsync();
-            var patientNotes = allNotes.Where(note => note.PatientId == patientId);
+            //if (filters == null || !filters.Any())
+            //{
+            //    return BadRequest(new { Message = "At least one filter must be provided" });
+            //}
 
-            if (patientNotes == null || !patientNotes.Any())
+            var note = await _patientNoteService.GetByMultipleConditionsAsync(filters);
+
+            if (!note.Any())
             {
-                return NotFound("No patient notes found.");
+                return NotFound(new { Message = "No Note found matching the criteria" });
             }
 
-            return Ok(patientNotes);
+            return Ok(note);
         }
 
         // 🔹 Get Patient Note by ID
@@ -101,5 +105,21 @@ namespace MediCare.Controllers
 
             return Ok(new { Message = "PatientNote deleted successfully" });
         }
+
+        [HttpGet("DownloadNote")]
+        public async Task<IActionResult> DownloadDoctorNotes(int noteId)
+        {
+            var note = await _patientNoteService.GetByConditionAsync(n => n.PatientNoteId == noteId);
+            if (!note.Any())
+                return NotFound("No notes found for this doctor.");
+
+            var doctorNote = note.First();  // Get the single note
+            var notesText = doctorNote.NoteText;  // Directly access the note text
+
+            var pdfBytes = await _pdfService.GenerateDoctorNotePdfAsync("System", notesText);
+
+            return File(pdfBytes, "application/pdf", $"{noteId}_Notes.pdf");
+        }
+
     }
 }

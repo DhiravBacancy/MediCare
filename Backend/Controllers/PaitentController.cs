@@ -1,12 +1,9 @@
 ﻿using MediCare.DTOs;
 using MediCare.Models;
+using MediCare_.DTOs;
 using MediCare_.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace MediCare.Controllers
 {
@@ -22,29 +19,19 @@ namespace MediCare.Controllers
             _patientService = patientService;
         }
 
-        // ✅ Get All Patients (with search)
-        [HttpGet]
-        public async Task<IActionResult> GetPatients(string? search, int page = 1, int pageSize = 10)
+        [HttpPost("filtersearch")]
+        public async Task<IActionResult> SearchUsersByFilters([FromBody] List<Filter> filters)
         {
-            var patients = await _patientService.GetAllAsync();
+            var note = await _patientService.GetByMultipleConditionsAsync(filters);
 
-            if (!string.IsNullOrEmpty(search))
+            if (!note.Any())
             {
-                patients = patients.Where(p =>
-                    p.FirstName.Contains(search, StringComparison.OrdinalIgnoreCase) ||
-                    p.LastName.Contains(search, StringComparison.OrdinalIgnoreCase) ||
-                    p.MobileNo.Contains(search)).ToList();
+                return NotFound(new { Message = "No Note found matching the criteria" });
             }
 
-            var totalRecords = patients.Count();
-            var paginatedPatients = patients.Skip((page - 1) * pageSize).Take(pageSize).ToList();
-
-            var patientDtos = paginatedPatients.Select(p => new PatientDto(p)).ToList();
-
-            return Ok(new { TotalRecords = totalRecords, Data = patientDtos });
+            return Ok(note);
         }
 
-        // ✅ Get Patient by ID
         [HttpGet("{id}")]
         public async Task<IActionResult> GetPatient(int id)
         {
@@ -102,6 +89,19 @@ namespace MediCare.Controllers
             return Ok(new PatientDto(patient));
         }
 
+        [HttpGet("paged")]
+        public async Task<IActionResult> GetPagedPatients([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        {
+            var pagedResult = await _patientService.GetPaginatedAsync(pageNumber, pageSize);
+
+            if (!pagedResult.Items.Any())
+            {
+                return NotFound(new { Message = "No patients found" });
+            }
+
+            return Ok(pagedResult);
+        }
+
         // ✅ Delete Patient
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeletePatient(int id)
@@ -113,5 +113,29 @@ namespace MediCare.Controllers
 
             return Ok(new { message = "Patient deleted successfully" });
         }
+
+        //[HttpGet("{id}/details")]
+        //public async Task<IActionResult> GetPatientDetails(int id)
+        //{
+        //    var patient = await _patientService.GetByIdAsync(id);
+        //    if (patient == null) return NotFound("Patient not found");
+
+        //    var appointments = await _appointmentService.GetByPatientIdAsync(id);
+
+        //    var result = new
+        //    {
+        //        Patient = patient,
+        //        Appointments = appointments.Select(a => new
+        //        {
+        //            a.AppointmentId,
+        //            a.AppointmentDate,
+        //            a.DoctorName,
+        //            Notes = _appointmentNoteService.GetByAppointmentIdAsync(a.AppointmentId).Result
+        //        })
+        //    };
+
+        //    return Ok(result);
+        //}
+
     }
 }

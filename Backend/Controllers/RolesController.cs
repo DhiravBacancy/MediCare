@@ -1,6 +1,7 @@
 ﻿using MediCare.Data;
 using MediCare.Dtos;
 using MediCare.Models;
+using MediCare_.DTOs;
 using MediCare_.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -19,22 +20,40 @@ namespace MediCare.Controllers
             _roleService = roleService;
         }
 
-        // 🔹 1. Get All Roles
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<Role>>> GetRoles()
+        [HttpPost("filtersearch")]
+        public async Task<IActionResult> SearchUsersByFilters([FromBody] List<Filter> filters)
         {
-            var roles = await _roleService.GetAllAsync();
+            //if (filters == null || !filters.Any())
+            //{
+            //    return BadRequest(new { Message = "At least one filter must be provided" });
+            //}
+
+            var roles = await _roleService.GetByMultipleConditionsAsync(filters);
+
+            if (!roles.Any())
+            {
+                return NotFound(new { Message = "No role found matching the criteria" });
+            }
+
             return Ok(roles);
         }
 
-        // 🔹 2. Get Role By ID
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Role>> GetRole(int id)
-        {
-            var role = await _roleService.GetByIdAsync(id);
-            if (role == null) return NotFound("Role not found");
-            return role;
-        }
+
+        //[HttpGet]
+        //public async Task<ActionResult<IEnumerable<Role>>> GetRoles()
+        //{
+        //    var roles = await _roleService.GetAllAsync();
+        //    return Ok(roles);
+        //}
+
+        //// 🔹 2. Get Role By ID
+        //[HttpGet("{id}")]
+        //public async Task<ActionResult<Role>> GetRole(int id)
+        //{
+        //    var role = await _roleService.GetByIdAsync(id);
+        //    if (role == null) return NotFound("Role not found");
+        //    return role;
+        //}
 
         // 🔹 3. Create Role
         [HttpPost]
@@ -45,7 +64,7 @@ namespace MediCare.Controllers
 
             var role = new Role { RoleName = roleDto.RoleName };
             await _roleService.AddAsync(role);
-            return CreatedAtAction(nameof(GetRole), new { id = role.RoleId }, role);
+            return Ok(new { Message = "Role created successfully", Specialization = role });
         }
 
         // 🔹 4. Update Role
@@ -54,7 +73,7 @@ namespace MediCare.Controllers
         {
             var role = await _roleService.GetByIdAsync(id);
             if (role == null) return NotFound("Role not found");
-            role.RoleName = roleDto.RoleName;
+            role.RoleName = roleDto.RoleName ?? role.RoleName;
             await _roleService.UpdateAsync(role);
             return Ok(new { message = "Role updated successfully" });
         }
