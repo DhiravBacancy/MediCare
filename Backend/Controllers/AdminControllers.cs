@@ -2,6 +2,7 @@
 using MediCare.Models;
 using MediCare.Services;
 using MediCare_.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -10,17 +11,19 @@ using System.Threading.Tasks;
 
 namespace MediCare.Controllers
 {
-    //[Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin")]
     [Route("api/[controller]/[action]")]
     public class AdminController : ControllerBase
     {
         private readonly IEmailService _emailService;
-        private readonly IGenericService<User> _userService; // Use Generic Service
+        private readonly IGenericService<User> _userService;
+        private readonly IGenericService<Role> _roleService;// Use Generic Service
 
-        public AdminController(IEmailService emailService, IGenericService<User> userService)
+        public AdminController(IEmailService emailService, IGenericService<User> userService, IGenericService<Role> roleSerivce)
         {
             _emailService = emailService;
             _userService = userService;
+            _roleService = roleSerivce;
         }
 
         [HttpPost]
@@ -29,13 +32,13 @@ namespace MediCare.Controllers
             if (model == null)
                 return BadRequest("User model is null");
 
-            var users = await _userService.GetAllAsync();
-            var role = users.Select(u => u.Role).FirstOrDefault(r => r.RoleId == model.RoleId);
+            //var users = await _userService.GetAllAsync();
+            var role = await _roleService.GetByIdAsync(model.RoleId);
             if (role == null)
                 return BadRequest("Invalid role. Role must be 'Admin', 'Doc', or 'Receptionist'.");
 
-            if (role.RoleName == "Admin" && users.Any(u => u.Role.RoleName == "Admin"))
-                return BadRequest("Admin already exists. Only one admin is allowed.");
+            //if (role.RoleName == "Admin" && users.Any(u => u.Role.RoleName == "Admin"))
+            //    return BadRequest("Admin already exists. Only one admin is allowed.");
 
             string hashedPassword = BCrypt.Net.BCrypt.HashPassword(model.Password);
 

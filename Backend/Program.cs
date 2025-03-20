@@ -9,6 +9,8 @@ using MediCare.Repository;
 using MediCare_.Services;
 using QuestPDF;
 using QuestPDF.Infrastructure;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 
 QuestPDF.Settings.License = LicenseType.Community;
 
@@ -19,6 +21,8 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddSingleton<IEmailService, EmailService>();
 builder.Services.AddScoped<IPdfService, PdfService>();
 
+builder.Services.AddMemoryCache(); // Register IMemoryCache
+builder.Services.AddScoped<ICacheService, CacheService>(); // Register CacheService
 
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 builder.Services.AddScoped(typeof(IGenericService<>), typeof(GenericService<>));
@@ -35,12 +39,29 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         {
             ValidateIssuer = true,
             ValidateAudience = true,
-            ValidateLifetime = true,
             ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
             ValidAudience = builder.Configuration["JwtSettings:Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:SecretKey"]))
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:SecretKey"])),
+            ValidateLifetime = true,
+            ClockSkew = TimeSpan.Zero
         };
+
+        options.Events = new JwtBearerEvents
+        {
+            OnTokenValidated = async context =>
+            {
+                var authService = context.HttpContext.RequestServices.GetRequiredService<IAuthService>();
+                var token = context.Request.Headers["Authorization"].ToString().Split(" ")[1];
+                //Console.WriteLine(context.SecurityToken);
+                if (authService.IsTokenRevoked(token))
+                {
+                    context.Fail("This token has been revoked.");
+                }
+            }
+        };
+
     });
+
 
 // CORS policy setup
 builder.Services.AddCors(options =>
@@ -52,6 +73,7 @@ builder.Services.AddCors(options =>
                .AllowAnyHeader();
     });
 });
+
 
 // Add services to the container (controllers, Swagger)
 builder.Services.AddControllers();

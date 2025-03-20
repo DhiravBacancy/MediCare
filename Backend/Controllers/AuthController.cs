@@ -42,12 +42,12 @@ namespace MediCare.Controllers
 
         // 🔹 Logout - Invalidate Token
         [HttpPost]
-        [Authorize]
+        //[Authorize]
         public IActionResult Logout([FromBody] TokenDto tokenDto)
         {
             if (tokenDto == null || string.IsNullOrWhiteSpace(tokenDto.AccessToken))
                 return BadRequest("Invalid token");
-
+            Console.WriteLine($"Stored token Value: {tokenDto.AccessToken}, Type: {tokenDto.AccessToken.GetType()}");
             _authService.Logout(tokenDto.AccessToken);
             return Ok(new { Message = "Successfully logged out" });
         }
